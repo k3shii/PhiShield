@@ -1,0 +1,18 @@
+# Ignore JSON (if it's bloating stats)
+*.json linguist-documentation
+
+# Ignore CSS if it's overrepresented (e.g., minified files)
+*.min.css linguist-vendored
+
+# Classify Jupyter Notebooks as Python (optional)
+*.ipynb linguist-language=Python
+
+# Force HTML to be counted (if GitHub ignores it)
+*.html linguist-detectable=true
+
+# Vendor generated JS/CSS (e.g., from build tools)
+/dist/* linguist-vendored
+/build/* linguist-vendored
+
+# Ensure Python files are detected (if hidden)
+*.py linguist-detectable=true
