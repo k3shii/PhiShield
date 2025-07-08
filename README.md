@@ -201,7 +201,7 @@ After installation, verify everything is working correctly:
 - Click PhiShield extension icon
 - Enter a known safe URL (e.g., https://www.google.com)
 - Should return "Safe" or "Legitimate" result with confidence
-- Enter a known phishing URL for testing
+- Enter a known phishing URL for testing (https://github.com/Phishing-Database/Phishing.Database/blob/master/phishing-links-NEW-today.txt)
 
 ### 4. Test Admin Dashboard
 
