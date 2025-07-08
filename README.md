@@ -29,7 +29,7 @@ The project includes a pre-trained machine learning model (`model.pkl`) and uses
 ## Project Structure
 
 ```
-PhiShield_FYP2/
+PhiShield/
 ├── app.py                 # Flask backend server
 ├── feature.py            # Feature extraction module
 ├── model.pkl             # Trained ML model
@@ -101,7 +101,7 @@ cd PhiShield
 2. Navigate to the project directory (if not already there):
 
    ```bash
-   cd PhiShield_FYP2
+   cd PhiShield
    ```
 3. Activate virtual environment (if not already activated):
 
