@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark List - Phishing URL Detection</title>
+    <style>
+        body {
+            font-size: 14px;
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 0 10px 0;
+        }
+        .back-link {
+            color: #666;
+            text-decoration: none;
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .bookmark-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .bookmark-url {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 220px;
+        }
+        .remove-button {
+            border: none;
+            background: none;
+            color: red;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+        .empty-message {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        #bookmarkContainer {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">Bookmark List</h1>
+        <a href="popup.html" class="back-link">Back</a>
+    </div>
+    
+    <div id="bookmarkContainer">
+        <!-- Bookmark items will be loaded here -->
+    </div>
+
+    <script src="bookmark-list.js"></script>
+</body>
+</html> 

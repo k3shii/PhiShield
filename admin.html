@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - URL Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+        #loginForm {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #adminContent {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginForm" class="container">
+        <h2 class="text-center mb-4">Admin Login</h2>
+        <form onsubmit="return handleLogin(event)">
+            <div class="mb-3">
+                <input type="text" class="form-control" id="username" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <input type="password" class="form-control" id="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+
+    <!-- Admin Content -->
+    <div id="adminContent" class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>URL Management Dashboard</h1>
+            <button class="btn btn-outline-danger" onclick="handleLogout()">Logout</button>
+        </div>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">Pending</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="blacklist-tab" data-bs-toggle="tab" data-bs-target="#blacklist" type="button" role="tab">Blacklist</button>
+            </li>
+            <!-- <li class="nav-item" role="presentation">
+                <button class="nav-link" id="whitelist-tab" data-bs-toggle="tab" data-bs-target="#whitelist" type="button" role="tab">Whitelist</button>
+            </li> -->
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Pending Reports Tab -->
+            <div class="tab-pane show active" id="pending" role="tabpanel">
+                <div class="list-group" id="pendingList">
+                    <!-- Pending reports will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Blacklist Tab -->
+            <div class="tab-pane" id="blacklist" role="tabpanel">
+                <div class="list-group" id="blacklistList">
+                    <!-- Blacklisted URLs will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if user is already logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminKey = localStorage.getItem('adminKey');
+            if (adminKey) {
+                showAdminContent(adminKey);
+            }
+        });
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Simple validation - you can change these credentials
+            if (username === 'admin' && password === 'admin123') {
+                localStorage.setItem('adminKey', 'your-secure-admin-key');
+                showAdminContent();
+            } else {
+                alert('Invalid username or password');
+            }
+
+            return false;
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('adminKey');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('adminContent').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        function showAdminContent(adminKey) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminContent').style.display = 'block';
+            loadPendingReports();
+            loadBlacklist();
+        }
+
+        async function loadPendingReports() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/admin/pending', {
+                    headers: {
+                        'X-Admin-Key': localStorage.getItem('adminKey')
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to load pending reports');
+                }
+                const data = await response.json();
+                const pendingList = document.getElementById('pendingList');
+                pendingList.innerHTML = '';
+
+                if (data.length === 0) {
+                    pendingList.innerHTML = '<div class="list-group-item">No pending reports</div>';
+                    return;
+                }
+
+                data.forEach(report => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${report.url}</strong>
+                            <div class="timestamp">Reported: ${new Date(report.timestamp).toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <button class="btn btn-danger btn-sm me-2" onclick="addToBlacklist('${report.url}')">Blacklist</button>
+                            <button class="btn btn-warning btn-sm" onclick="removeFromPending('${report.url}')">Remove</button>
+                        </div>
+                    `;
+                    pendingList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading pending reports:', error);
+                const pendingList = document.getElementById('pendingList');
+                pendingList.innerHTML = '<div class="list-group-item text-danger">Error loading pending reports</div>';
+            }
+        }
+
+        async function loadBlacklist() {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/admin/blacklist', {
+                    headers: {
+                        'X-Admin-Key': localStorage.getItem('adminKey')
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to load blacklist');
+                }
+                const data = await response.json();
+                const blacklistList = document.getElementById('blacklistList');
+                blacklistList.innerHTML = '';
+
+                if (data.length === 0) {
+                    blacklistList.innerHTML = '<div class="list-group-item">No blacklisted URLs</div>';
+                    return;
+                }
+
+                data.forEach(entry => {
+                    const item = document.createElement('div');
+                    item.className = 'list-group-item';
+                    item.innerHTML = `
+                        <div>
+                            <strong>${entry.url}</strong>
+                            <div class="timestamp">Added: ${new Date(entry.timestamp).toLocaleString()}</div>
+                        </div>
+                        <button class="btn btn-warning btn-sm" onclick="removeFromBlacklist('${entry.url}')">Remove</button>
+                    `;
+                    blacklistList.appendChild(item);
+                });
+            } catch (error) {
+                console.error('Error loading blacklist:', error);
+                const blacklistList = document.getElementById('blacklistList');
+                blacklistList.innerHTML = '<div class="list-group-item text-danger">Error loading blacklist</div>';
+            }
+        }
+
+        async function addToBlacklist(url) {
+            try {
+                const response = await fetch('http://127.0.0.1:5000/admin/blacklist', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': localStorage.getItem('adminKey')
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to add URL to blacklist');
+                }
+
+                alert('URL added to blacklist successfully');
+                loadPendingReports();
+                loadBlacklist();
+            } catch (error) {
+                console.error('Error adding to blacklist:', error);
+                alert('Error adding URL to blacklist');
+            }
+        }
+
+        async function removeFromBlacklist(url) {
+            if (!confirm('Are you sure you want to remove this URL from the blacklist?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/admin/blacklist', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': localStorage.getItem('adminKey')
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to remove URL from blacklist');
+                }
+
+                alert('URL removed from blacklist successfully');
+                loadBlacklist();
+            } catch (error) {
+                console.error('Error removing from blacklist:', error);
+                alert('Error removing URL from blacklist');
+            }
+        }
+
+        async function removeFromPending(url) {
+            if (!confirm('Are you sure you want to remove this URL from pending reports?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/admin/pending', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': localStorage.getItem('adminKey')
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to remove URL from pending reports');
+                }
+
+                alert('URL removed from pending reports successfully');
+                loadPendingReports();
+            } catch (error) {
+                console.error('Error removing from pending reports:', error);
+                alert('Error removing URL from pending reports');
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "PhiShield",
+  "version": "1.0",
+  "description": "An intelligence-based web extension to detect phishing URLs integrated with machine learning.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs",
+    "http://127.0.0.1:5000/*"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "PhiShield",
+    "default_icon": {
+    "16": "./img/default.png",
+    "48": "./img/default.png",
+    "128": "./img/default.png"
+    }
+  },
+  "content_scripts": [
+    {
+    "matches": ["<all_urls>"],
+    "js": ["content.js"]
+    }
+  ],
+  "icons": {
+    "16": "./img/default.png",
+    "48": "./img/default.png",
+    "128": "./img/default.png"
+  }
+}
